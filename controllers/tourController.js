@@ -14,6 +14,19 @@ exports.checkId = (req, res, next, val) => {
     next();
 };
 
+exports.checkBody = (req, res, next) => {
+    console.log(`Tour body is: ${JSON.stringify(req.body)}`);
+
+    if (!req.body.name || !req.body.price) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Invalid body!' // Missing name or price
+        });
+    }
+
+    next();
+};
+
 exports.getAllTours = (req, res) => {
     console.log(req.requestTime);
 
