@@ -38,7 +38,9 @@ const getTourById = (req, res) => {
 
 const createTour = (req, res) => {
     const newId = tours[tours.length - 1].id + 1;
-    const newTour = Object.assign({id: newId}, req.body);
+    const newTour = Object.assign({
+        id: newId
+    }, req.body);
 
     tours.push(newTour);
 
@@ -82,11 +84,14 @@ const deleteTour = (req, res) => {
     });
 };
 
-app.get('/api/v1/tours', getTour);
-app.get('/api/v1/tours/:id', getTourById);
-app.post('/api/v1/tours', createTour);
-app.patch('/api/v1/tours/:id', updateTour);
-app.delete('/api/v1/tours/:id', deleteTour);
+app.route('/api/v1/tours')
+    .get(getTour)
+    .post(getTourById);
+
+app.route('/api/v1/tours/:id')
+    .get(getTourById)
+    .patch(updateTour)
+    .delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {
