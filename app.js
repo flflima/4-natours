@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
-// Route handlers
+// Routes handlers
 const getAllTours = (req, res) => {
     console.log(req.requestTime);
 
@@ -137,23 +137,34 @@ const deleteUser = (req, res) => {
 };
 
 // Routes 
-app.route('/api/v1/tours')
+const tourRouter = express.Router();
+const userRouter = express.Router();
+
+tourRouter
+    .route('/')
     .get(getAllTours)
     .post(createTour);
 
-app.route('/api/v1/tours/:id')
+tourRouter
+    .route('/:id')
     .get(getTour)
     .patch(updateTour)
     .delete(deleteTour);
 
-app.route('/api/v1/users')
+userRouter
+    .route('/')
     .get(getAllUsers)
     .post(createUser);
 
-app.route('/api/v1/users/:id')
+userRouter
+    .route('/:id')
     .get(getUser)
     .patch(updateUser)
     .delete(deleteUser);
+
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+
 
 // Server
 const port = 3000;
