@@ -9,7 +9,7 @@ const DB = process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSW
 mongoose.connect(DB, {
   userNewUrlParser: true,
   useCreateIndex: true,
-  useFindAndModify: false
+  useFindAndModify: false,
 }).then(() => console.log('DB connection successful'));
 
 const port = process.env.PORT;
