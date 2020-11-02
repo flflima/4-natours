@@ -1,5 +1,3 @@
-const { query } = require('express');
-const { copy } = require('../app');
 const Tour = require('../models/tourModel');
 
 // exports.checkId = (req, res, next, val) => {
@@ -33,9 +31,12 @@ exports.getAllTours = async (req, res) => {
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObject[el]);
 
-    console.log(req.query, queryObject);
+    console.log(queryObject);
 
-    const query = Tour.find(req.query);
+    let queryStr = JSON.stringify(queryObject);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    const query = Tour.find(JSON.parse(queryStr));
 
     // const query = Tour.find({
     //   duration: 5,
