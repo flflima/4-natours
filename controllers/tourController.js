@@ -1,3 +1,5 @@
+const { query } = require('express');
+const { copy } = require('../app');
 const Tour = require('../models/tourModel');
 
 // exports.checkId = (req, res, next, val) => {
@@ -27,7 +29,26 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    const queryObject = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach((el) => delete queryObject[el]);
+
+    console.log(req.query, queryObject);
+
+    const query = Tour.find(req.query);
+
+    // const query = Tour.find({
+    //   duration: 5,
+    //   difficulty: 'easy',
+    // });
+
+    // const query = Tour.find()
+    //   .where('duration')
+    //   .equals(5)
+    //   .where('difficulty')
+    //   .equals('easy');
+
+    const tours = await query;
 
     res.status(200).json({
       status: 'success',
