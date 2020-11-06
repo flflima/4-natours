@@ -32,9 +32,14 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = async (req, res) => {
-  try {
-    const queryObject = { ...req.query };
+class APIFeatures {
+  constructor(query, queryString) {
+    this.query = query;
+    this.queryString = queryString;
+  }
+
+  filter() {
+    const queryObject = { ...this.queryString };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach((el) => delete queryObject[el]);
 
@@ -43,7 +48,24 @@ exports.getAllTours = async (req, res) => {
     let queryStr = JSON.stringify(queryObject);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    let query = Tour.find(JSON.parse(queryStr));
+    this.query.find(JSON.parse(queryStr));
+  }
+}
+
+exports.getAllTours = async (req, res) => {
+  try {
+    console.log(req.query);
+
+    // const queryObject = { ...req.query };
+    // const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    // excludedFields.forEach((el) => delete queryObject[el]);
+
+    // console.log(queryObject);
+
+    // let queryStr = JSON.stringify(queryObject);
+    // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    // let query = Tour.find(JSON.parse(queryStr));
 
     if (req.query.sort) {
       const sortBy = req.query.sort.split(',').join(' ');
@@ -71,18 +93,8 @@ exports.getAllTours = async (req, res) => {
       if (skip >= numTours) throw new Error('This page does not exist');
     }
 
-    // const query = Tour.find({
-    //   duration: 5,
-    //   difficulty: 'easy',
-    // });
-
-    // const query = Tour.find()
-    //   .where('duration')
-    //   .equals(5)
-    //   .where('difficulty')
-    //   .equals('easy');
-
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query).filter();
+    const tours = await features.query;
 
     res.status(200).json({
       status: 'success',
