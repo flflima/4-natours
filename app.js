@@ -29,4 +29,12 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+// If reaches this point means that didn't matched the routes
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    messagem: `Can't find ${req.originalUrl} on this server!`,
+  });
+});
+
 module.exports = app;
