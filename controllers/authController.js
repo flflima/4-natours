@@ -5,7 +5,9 @@ const AppError = require('../utils/appError');
 
 // eslint-disable-next-line arrow-body-style
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
@@ -41,7 +43,7 @@ exports.login = catchAsync(async (req, res, next) => {
   // check if user exists and if password is correct
   const user = await User.findOne({ email: email }).select('+password');
 
-  if (!user || !await user.correctPassword(password, user.password)) {
+  if (!user || !(await user.correctPassword(password, user.password))) {
     next(new AppError('Incorrect email or password!', 401));
   }
 
