@@ -22,6 +22,21 @@ const signToken = (id) => {
   );
 };
 
+const createAndSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  // remove passsword from body response on signup
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: 'success',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -32,18 +47,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     role: req.body.role,
   });
 
-  const token = signToken(newUser._id);
-
-  // remove passsword from body response on signup
-  newUser.password = undefined;
-
-  res.status(201).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  createAndSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -67,12 +71,7 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // send token
-  const token = signToken(user._id);
-
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createAndSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -106,7 +105,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   // check if user changed password after token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError('User recently changed password. PLease login again!', 401)
+      new AppError('User recently changed password. Please login again!', 401)
     );
   }
 
@@ -195,10 +194,32 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 
   // log user in and send token
-  const token = signToken(user._id);
+  createAndSendToken(user, 200, res);
+});
 
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // get the user
+  const currentUser = await User.findById(req.user.id).select('+password');
+
+  if (!currentUser) {
+    return next(
+      new AppError('The user belonging to this token no longer exists!', 401)
+    );
+  }
+
+  // validate current password
+  if (!(await currentUser.correctPassword(req.body.currentPassword, currentUser.password))) {
+    return next(new AppError('Current password is invalid!', 400));
+  }
+
+  // if password is correct, then update
+  currentUser.password = req.body.newPassword;
+  currentUser.passwordConfirm = req.body.newPasswordConfirm;
+  currentUser.passwordResetToken = undefined;
+  currentUser.passwordResetExpires = undefined;
+
+  await currentUser.save();
+
+  // login and return jwt
+  createAndSendToken(currentUser, 200, res);
 });
