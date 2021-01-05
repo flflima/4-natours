@@ -9,6 +9,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const app = express();
 
@@ -37,7 +38,13 @@ app.use(express.json({
 // data sanitization
 app.use(mongoSanitize());
 
-app.use(xss()); 
+app.use(xss());
+
+app.use(hpp({
+  whitelist: [
+    'duration', 'ratingsQuantity', 'ratingsAverage', 'maxGroupSize', 'difficulty', 'price'
+  ]
+}));
 
 app.use(express.static(`${__dirname}/public`));
 
