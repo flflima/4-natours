@@ -87,25 +87,44 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
 });
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
-  const stats = await Tour.aggregate([
-    {
-      $match: { ratingsAverage: { $gte: 4.5 } },
+  const stats = await Tour.aggregate([{
+      $match: {
+        ratingsAverage: {
+          $gte: 4.5
+        }
+      },
     },
     {
       $group: {
         // _id: null,
-        _id: { $toUpper: '$difficulty' },
+        _id: {
+          $toUpper: '$difficulty'
+        },
         // _id: '$ratingsAverage',
-        numTours: { $sum: 1 },
-        numRatings: { $sum: '$ratingsQuantity' },
-        avgRating: { $avg: '$ratingsAverage' },
-        avgPrice: { $avg: '$price' },
-        minPrice: { $min: '$price' },
-        maxPrice: { $max: '$price' },
+        numTours: {
+          $sum: 1
+        },
+        numRatings: {
+          $sum: '$ratingsQuantity'
+        },
+        avgRating: {
+          $avg: '$ratingsAverage'
+        },
+        avgPrice: {
+          $avg: '$price'
+        },
+        minPrice: {
+          $min: '$price'
+        },
+        maxPrice: {
+          $max: '$price'
+        },
       },
     },
     {
-      $sort: { avgPrice: 1 },
+      $sort: {
+        avgPrice: 1
+      },
     },
   ]);
 
@@ -120,8 +139,7 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
 exports.getMonthlyPan = catchAsync(async (req, res, next) => {
   const year = req.params.year * 1;
 
-  const plan = await Tour.aggregate([
-    {
+  const plan = await Tour.aggregate([{
       $unwind: '$startDates',
     },
     {
@@ -134,13 +152,21 @@ exports.getMonthlyPan = catchAsync(async (req, res, next) => {
     },
     {
       $group: {
-        _id: { $month: '$startDates' },
-        numToursStarts: { $sum: 1 },
-        tours: { $push: '$name' },
+        _id: {
+          $month: '$startDates'
+        },
+        numToursStarts: {
+          $sum: 1
+        },
+        tours: {
+          $push: '$name'
+        },
       },
     },
     {
-      $addFields: { month: '$_id' },
+      $addFields: {
+        month: '$_id'
+      },
     },
     {
       $project: {
@@ -148,7 +174,9 @@ exports.getMonthlyPan = catchAsync(async (req, res, next) => {
       },
     },
     {
-      $sort: { numToursStarts: -1 },
+      $sort: {
+        numToursStarts: -1
+      },
     },
     {
       $limit: 12,
