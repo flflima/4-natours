@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-// const validator = require('validator');
 
 const tourSchema = new mongoose.Schema({
   name: {
@@ -33,7 +32,7 @@ const tourSchema = new mongoose.Schema({
     type: Number,
     default: 4.5,
     min: [1, 'Rating must be above 1.0'], // numbers and dates
-    max: [5, 'Rating must be below 5.0']  // numbers and dates
+    max: [5, 'Rating must be below 5.0'] // numbers and dates
   },
   ratingsQuantity: {
     type: Number,
@@ -97,6 +96,9 @@ const tourSchema = new mongoose.Schema({
     address: String,
     description: String,
     day: Number
+  }],
+  guides: [{
+    type: mongoose.Schema.ObjectId, ref: 'User'
   }]
 }, {
   toJSON: {
